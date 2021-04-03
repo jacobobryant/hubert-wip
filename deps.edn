@@ -1,0 +1,16 @@
+{:paths ["src" "resources"]
+ :deps
+ {flub/core           {:local/root "../flub/core"}
+  flub/components     {:local/root "../flub/components"}
+  flub/crux           {:local/root "../flub/crux"}
+  flub/extra          {:local/root "../flub/extra"}
+  flub/malli          {:local/root "../flub/malli"}
+  flub/middleware     {:local/root "../flub/middleware"}
+  flub/views          {:local/root "../flub/views"}
+  buddy/buddy-sign    {:mvn/version "3.3.0"}
+  lambdaisland/uri    {:mvn/version "1.4.54"}
+  ;girouette/girouette {:git/url "https://github.com/green-coder/girouette"
+  ;                     :sha "f90cc9c32fec13ce99649ca66743416d8060bf4e"
+  ;                     :deps/root "lib/girouette"}
+  org.clojure/clojure {:mvn/version "1.10.0"}
+  org.slf4j/slf4j-nop {:mvn/version "1.7.25"}}}
