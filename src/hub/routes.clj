@@ -6,6 +6,7 @@
     [flub.crux :as flux]
     [flub.extra :as fe]
     [flub.views :as fv]
+    [hub.css :as css]
     [hub.schema :as s]
     [hub.templates :as templates]
     [hub.util :as hu]
@@ -68,11 +69,28 @@
                               :max-age (* 60 60 24 90)}
        :session (assoc session :uid (or existing-uid new-uid))})
     {:status 302
-     :headers/Location "/?invalid-token=true"}))
+     :headers/Location "/?error=invalid-token"}))
+
+(def page-routes
+  {"/" #'v/home})
+
+(def auth-page-routes
+  {"/hub/" #'v/hub-home})
+
+(defn wrap-auth-required [handler]
+  (fn [{:keys [session/uid] :as sys}]
+    (if uid
+      (handler sys)
+      {:status 302
+       :headers/Location "/?error=unauthenticated"})))
 
 (def routes
-  [["/" {:get #(fv/render v/home %)}]
-   ["/hub" {}
-    ["/api" {}
-     ["/authenticate" {:post #(authenticate %)
-                       :get #(verify-token %)}]]]])
+  (into
+    [["" {:middleware [wrap-auth-required]}
+      (for [[path view] auth-page-routes]
+        [path {:get #(fv/render view %)}])]
+     (for [[path view] page-routes]
+       [path {:get #( %)}])
+     ["/hub/api" {}
+      ["/authenticate" {:post #(authenticate %)
+                        :get #(verify-token %)}]]]))
