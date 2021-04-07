@@ -6,6 +6,7 @@
     [flub.middleware :as fm]
     [flub.views :as fv]
     [hub.config :as config]
+    [hub.plugins :as plugins]
     [hub.routes :as r]
     [hub.schema :as schema]
     [hub.views :as v]
@@ -29,6 +30,15 @@
      :flub.malli/registry (mr/composite-registry
                             m/default-registry
                             schema/registry)}))
+
+(defn wrap-plugins [sys]
+  (let [plugins (map #(deref (requiring-resolve %)) plugins/plugins)
+        routes (mapv (fn [{:keys [routes prefix]}]
+                       [(str "/" prefix) {} routes])
+                 plugins)]
+    (-> sys
+      (assoc :hub/plugins plugins)
+      (update :flub.reitit/routes into routes))))
 
 (defn on-error [req exc]
   (fv/render v/internal-error req {:status 500}))
@@ -56,6 +66,7 @@
 (def all-components
   [config/merge-config
    merge-code
+   wrap-plugins
    c/nrepl
    fc/start-crux
    c/reitit

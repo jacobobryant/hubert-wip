@@ -3,7 +3,8 @@
     [crux.api :as crux]
     [flub.core :as flub]
     [flub.crux :as flux]
-    [buddy.core.nonce :as nonce]))
+    [buddy.core.nonce :as nonce]
+    [reitit.core :as r]))
 
 (defn sys []
   (let [{:keys [flub.crux/node] :as sys} @flub/system]
@@ -12,7 +13,9 @@
 (comment
   (flub/base64-encode (nonce/random-bytes 16))
 
-  (let [{:keys [flub.crux/db]} (sys)]
-    (flux/q-entity @db [[:user/email]])
-    )
+  (flub/pprint
+    (let [{:keys [flub.crux/db flub.reitit/router]} (sys)]
+    (r/routes router)
+    ;(flux/q-entity @db [[:user/email]])
+    ))
   )
