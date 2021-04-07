@@ -1,0 +1,44 @@
+p {
+  @apply mb-3;
+}
+
+ul {
+  list-style-type: disc;
+}
+
+ol {
+  list-style-type: decimal;
+}
+
+ul, ol {
+  margin-bottom: 1rem;
+  padding-left: 2.5rem;
+}
+
+code, kbd, pre, samp {
+  font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace
+}
+
+code {
+  word-break: break-word;
+  padding: .2em .4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: #f3f3f3;
+  border-radius: 6px;
+}
+
+.input-text::-webkit-input-placeholder {
+  color: #6b7280;
+}
+.input-text::-moz-placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+.input-text:-moz-placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+.input-text::-ms-input-placeholder {
+  color: #6b7280;
+}

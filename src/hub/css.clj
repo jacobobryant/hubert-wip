@@ -1,6 +1,7 @@
 (ns hub.css
   (:require
     [clojure.string :as str]
+    [garden.core :as garden]
     [girouette.tw.core :refer [make-api]]
     [girouette.util :as util]
     [girouette.tw.common :as common]
@@ -25,32 +26,22 @@
 (declare class-name->garden)
 
 (def apply-classes
-  '{btn [text-center py-2 px-4 bg-dark text-white
-         rounded disabled:opacity-50]
-    btn-hover [bg-black]
-    btn-disabled [opacity-50]
+  '{btn ["text-center" "py-2" "px-4" "bg-dark" "text-white"
+         "rounded" "disabled:opacity-50" "hover:bg-black"]
+    input-text ["border" "border-gray-400" "rounded" "w-full" "py-2" "px-3" "leading-tight"
+                "appearance-none" "focus:outline-none" "focus:ring" "focus:border-blue-300"
+                "ring-blue-300" "text-black" "ring-opacity-30"]
+    link ["text-blue-600" "hover:underline"]
     })
 
-(def apply-components
-  (vec
-    (for [[from to] apply-classes]
-      {:id (keyword from)
-       :rules (str "\n" from " = <'" from "'>\n")
-       :garden (fn [_]
-                 (->> to
-                   (map (comp second class-name->garden str))
-                   (filter map?)
-                   (reduce merge)))})))
-
 (def custom
-  (into
-    [{:id :max-w-prose
-      :rules "
-      max-w-prose = <'max-w-prose'>
-      "
-      :garden (fn [_]
-                {:max-width "65ch"})}]
-    apply-components))
+  [{:id :max-w-prose
+    :rules "
+    max-w-prose = <'max-w-prose'>
+           "
+    :garden (fn [_]
+              {:max-width "65ch"})}]
+  #_(into apply-components))
 
 (def components
   (util/into-one-vector
@@ -81,4 +72,5 @@
   (:class-name->garden
     (make-api components
       {:color-map my-color-map
-       :font-family-map typography/default-font-family-map})))
+       :font-family-map typography/default-font-family-map
+       :apply-classes apply-classes})))

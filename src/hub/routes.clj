@@ -90,7 +90,7 @@
       (for [[path view] auth-page-routes]
         [path {:get #(fv/render view %)}])]
      (for [[path view] page-routes]
-       [path {:get #( %)}])
+       [path {:get #(fv/render view %)}])
      ["/hub/api" {}
       ["/authenticate" {:post #(authenticate %)
                         :get #(verify-token %)}]]]))
