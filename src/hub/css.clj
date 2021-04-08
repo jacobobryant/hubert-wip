@@ -74,3 +74,6 @@
       {:color-map my-color-map
        :font-family-map typography/default-font-family-map
        :apply-classes apply-classes})))
+
+(comment
+  (class-name->garden ""))

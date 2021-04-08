@@ -1,10 +1,11 @@
 (ns hub.views
   (:require
+    [clojure.string :as str]
+    [crux.api :as crux]
+    [flub.core :as flub]
     [flub.views :as fv]
+    [reitit.core :as r]
     [rum.core :as rum :refer [defc]]))
-
-(defn mstr [s]
-  s)
 
 (def default-opts
   #:base{:title "Hubert - All your content in one place"
@@ -25,8 +26,9 @@
     (apply fv/base opts contents)))
 
 (def navbar
-  [:.bg-rgba-343a40ff.text-white.px-4.py-3.text-3xl
-   "Findka Hub"])
+  [:.bg-rgba-343a40ff.text-white.p-3.text-2xl
+   [:a.leading-none {:href "/"}
+    "Findka Hub"]])
 
 (defc home [{:keys [params/error]}]
   (base {}
@@ -86,7 +88,37 @@
              [:.p-4
               msg]))})
 
-(defc hub-home [{:keys [session/uid]}]
-  (base {}
-    navbar
-    [:.p-4 [:p "yo"]]))
+(defc plugin-navbar [{:keys [flub.crux/db
+                             hub/plugins
+                             uri
+                             flub.reitit/router
+                             session/uid]
+                      :as req}]
+  (let [routes (into {} (r/routes router))]
+    [:.bg-rgba-343a40ff.text-white.p-3
+     [:.sm:flex.items-baseline
+      [:.text-2xl
+       [:a.leading-none {:href "/?no-redirect=true"}
+        "Findka Hub"]]
+      [:.flex-grow.h-1]
+      [:div
+       (:user/email (crux/entity @db uid))
+       " | "
+       [:a.hover:underline {:href "/hub/api/signout"}
+        "sign" fv/nbsp "out"]]]
+     [:.h-4]
+     [:.flex.flex-wrap
+      (flub/join [:.w-3]
+        (for [{:keys [title prefix]} plugins
+              :let [path (str "/" prefix "/")
+                    active (str/starts-with? uri path)]
+              :when (contains? routes path)]
+          [(if active
+             :a.bg-white.text-black.rounded.px-2.py-1
+             :a.p-1.hover:underline)
+           {:href path} title]))]]))
+
+(defc plugin-base [req & body]
+  (base req
+    (plugin-navbar req)
+    [:.p-3 body]))

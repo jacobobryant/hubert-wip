@@ -39,7 +39,7 @@
                        [(str "/" prefix) {} routes])
                  plugins)]
     (-> sys
-      (assoc :hub/plugins plugins)
+      (assoc :hub/plugins (sort-by :title plugins))
       (update :flub.reitit/routes into routes))))
 
 (defn on-error [req exc]

@@ -38,6 +38,9 @@
        :success email-sent}
       {:status (if email-sent 200 400)})))
 
+(defn default-plugin-path [{:keys [hub/plugins]}]
+  (str "/" (:prefix (first plugins)) "/"))
+
 (defn verify-token [{:keys [flub.crux/db
                             flub.crux/node
                             hub.middleware/secure
@@ -57,7 +60,7 @@
         (flux/submit-tx sys
           {[:user new-uid] {:user/email email}}))
       {:status 302
-       :headers/Location "/hub/"
+       :headers/Location (default-plugin-path sys)
        :cookies/csrf {:path "/"
                       :max-age (* 60 60 24 90)
                       :same-site :lax
@@ -71,26 +74,21 @@
     {:status 302
      :headers/Location "/?error=invalid-token"}))
 
-(def page-routes
-  {"/" #'v/home})
+(defn home [{:keys [session/uid hub/plugins params/no-redirect] :as sys}]
+  (if (and uid (not no-redirect))
+    {:status 302
+     :headers/Location (default-plugin-path sys)}
+    (fv/render v/home sys)))
 
-(def auth-page-routes
-  {"/hub/" #'v/hub-home})
-
-(defn wrap-auth-required [handler]
-  (fn [{:keys [session/uid] :as sys}]
-    (if uid
-      (handler sys)
-      {:status 302
-       :headers/Location "/?error=unauthenticated"})))
+(defn signout [_]
+  {:status 302
+   :headers/Location "/"
+   :cookies/ring-session {:value "" :max-age 0}
+   :cookies/csrf {:value "" :max-age 0}
+   :session nil})
 
 (def routes
-  (into
-    [["" {:middleware [wrap-auth-required]}
-      (for [[path view] auth-page-routes]
-        [path {:get #(fv/render view %)}])]
-     (for [[path view] page-routes]
-       [path {:get #(fv/render view %)}])
-     ["/hub/api" {}
-      ["/authenticate" {:post #(authenticate %)
-                        :get #(verify-token %)}]]]))
+  [["/" {:get #(home %)}]
+   ["/hub/api/authenticate" {:post #(authenticate %)
+                             :get #(verify-token %)}]
+   ["/hub/api/signout" {:get #(signout %)}]])
