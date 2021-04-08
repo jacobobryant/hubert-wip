@@ -90,11 +90,3 @@
   (base {}
     navbar
     [:.p-4 [:p "yo"]]))
-
-(comment
-  (time
-    (let []
-    (require 'hub.css :reload)
-    @(requiring-resolve 'hub.css/foo)
-    ))
-  )

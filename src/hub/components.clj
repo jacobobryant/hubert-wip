@@ -1,8 +1,10 @@
 (ns hub.components
   (:require
+    [clojure.java.io :as io]
+    [crux.api :as crux]
     [flub.core :as flub]
     [flub.components :as c]
-    [flub.crux :as fc]
+    [flub.crux :as flux]
     [flub.middleware :as fm]
     [flub.views :as fv]
     [hub.config :as config]
@@ -43,6 +45,41 @@
 (defn on-error [req exc]
   (fv/render v/internal-error req {:status 500}))
 
+(defn start-user-node [{:keys [hub/user-crux-dir]} uid]
+  (flux/start-node*
+    #::flux{:topology :standalone
+            :dir (io/file user-crux-dir (str uid))}))
+
+(defn user-nodes [sys]
+  (let [locks (atom #{})
+        nodes (atom {})
+        lock (Object.)
+        get-node (fn [uid]
+                   (swap! locks
+                     (fn [locks]
+                       (if-not (contains? locks uid)
+                         (conj locks uid)
+                         locks)))
+                   (locking (get @locks uid)
+                     (when-not (contains? @nodes uid)
+                       (swap! nodes assoc uid (start-user-node sys uid)))
+                     (get @nodes uid)))
+        close-nodes (fn []
+                      (doseq [[_ node] @nodes]
+                        (.close node)))]
+    (-> sys
+      (assoc :hub/get-node get-node)
+      (update :flub/stop conj close-nodes))))
+
+(defn wrap-user-db [handler]
+  (fn [{:keys [hub/get-node session/uid] :as req}]
+    (let [node (delay (get-node uid))
+          db (delay (crux/db @node))
+          req (cond-> req
+                uid (merge #:hub{:user-node node
+                                 :user-db db}))]
+      (handler req))))
+
 (defn wrap-middleware [{:keys [cookie/secret
                                hub.middleware/secure
                                flub.crux/node
@@ -51,11 +88,12 @@
   (let [store (cookie/cookie-store {:key (flub/base64-decode secret)})]
     (assoc sys :flub.web/handler
       (-> handler
+        wrap-user-db
+        (flux/wrap-db {:node node})
         (fm/wrap-defaults {:session-store store
                            :secure secure
                            :env sys
-                           :on-error on-error})
-        (fc/wrap-db {:node node})))))
+                           :on-error on-error})))))
 
 (defn ready [{:keys [flub.jetty/port]
               :or {port 8080}
@@ -68,8 +106,9 @@
    merge-code
    wrap-plugins
    c/nrepl
-   fc/start-crux
+   flux/start-node
    c/reitit
+   user-nodes
    wrap-middleware
    c/jetty
    ready])
