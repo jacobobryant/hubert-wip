@@ -22,13 +22,13 @@ generate-keys () {
 }
 
 tests () {
-  clojure -X:test
+  clj -X:test
 }
 
 build () {
   tests
-  clojure -X:girouette :watch? false
-  clojure -X:uberjar
+  clj -X:girouette :watch? false
+  clj -X:uberjar
 }
 
 logs () {
