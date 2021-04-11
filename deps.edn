@@ -28,7 +28,7 @@
               :ns-default girouette.processor
               :exec-fn process
               :exec-args {:css {:output-file "target/resources/public/css/main.css"}
-                          :garden-fn hub.css/class-name->garden
+                          :garden-fn hub.girouette/class-name->garden
                           :apply-classes hub.css/apply-classes
                           :watch? true}}
   :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.211"}}

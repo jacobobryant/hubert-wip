@@ -1,4 +1,4 @@
-(ns hub.css
+(ns hub.girouette
   (:require
     [clojure.string :as str]
     [garden.core :as garden]
@@ -21,27 +21,8 @@
     [girouette.tw.transform :as transform]
     [girouette.tw.interactivity :as interactivity]
     [girouette.tw.svg :as svg]
-    [girouette.tw.accessibility :as accessibility]))
-
-(declare class-name->garden)
-
-(def apply-classes
-  '{btn ["text-center" "py-2" "px-4" "bg-dark" "text-white"
-         "rounded" "disabled:opacity-50" "hover:bg-black"]
-    input-text ["border" "border-gray-400" "rounded" "w-full" "py-2" "px-3" "leading-tight"
-                "appearance-none" "focus:outline-none" "focus:ring" "focus:border-blue-300"
-                "ring-blue-300" "text-black" "ring-opacity-30"]
-    link ["text-blue-600" "hover:underline"]
-    })
-
-(def custom
-  [{:id :max-w-prose
-    :rules "
-    max-w-prose = <'max-w-prose'>
-           "
-    :garden (fn [_]
-              {:max-width "65ch"})}]
-  #_(into apply-components))
+    [girouette.tw.accessibility :as accessibility]
+    [hub.css :as hub]))
 
 (def components
   (util/into-one-vector
@@ -62,18 +43,13 @@
      table/components
      transform/components
      typography/components
-     custom]))
-
-(def my-color-map
-  (assoc color/default-color-map
-    "dark" "343a40"))
+     hub/components]))
 
 (def class-name->garden
   (:class-name->garden
     (make-api components
-      {:color-map my-color-map
-       :font-family-map typography/default-font-family-map
-       :apply-classes apply-classes})))
+      {:color-map (merge color/default-color-map hub/color-map)
+       :font-family-map typography/default-font-family-map})))
 
 (comment
   (class-name->garden ""))
