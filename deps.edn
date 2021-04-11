@@ -1,4 +1,4 @@
-{:paths ["src" "resources"]
+{:paths ["src" "resources" "target/resources"]
  :deps
  {flub/core           {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "core"}
   flub/components     {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "components"}
@@ -7,22 +7,33 @@
   flub/malli          {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "malli"}
   flub/middleware     {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "middleware"}
   flub/views          {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "views"}
-  girouette/girouette {;:local/root "../girouette/lib/girouette"
-                       :git/url "https://github.com/jacobobryant/girouette"
-                       :sha "4d4686c919ba10a5f8cd449f1ebcfef2c3a55ce5"
-                       :deps/root "lib/girouette"}
   org.clojure/clojure {:mvn/version "1.10.0"}
   org.slf4j/slf4j-nop {:mvn/version "1.7.25"}}
 
  :aliases
- {:girouette {:extra-deps {girouette/processor
+ {:test {:extra-paths ["test"]
+         :ns-default hub.tests.core
+         :exec-fn run}
+  :girouette {:extra-paths ["src-girouette"]
+              :extra-deps {girouette/processor
                            {;:local/root "../girouette/lib/processor"
                             :git/url "https://github.com/jacobobryant/girouette"
                             :sha "4d4686c919ba10a5f8cd449f1ebcfef2c3a55ce5"
-                            :deps/root "lib/processor"}}
+                            :deps/root "lib/processor"}
+                           girouette/girouette
+                           {;:local/root "../girouette/lib/girouette"
+                            :git/url "https://github.com/jacobobryant/girouette"
+                            :sha "4d4686c919ba10a5f8cd449f1ebcfef2c3a55ce5"
+                            :deps/root "lib/girouette"}}
               :ns-default girouette.processor
               :exec-fn process
-              :exec-args {:css {:output-file "resources/public/css/main.css"}
+              :exec-args {:css {:output-file "target/resources/public/css/main.css"}
                           :garden-fn hub.css/class-name->garden
                           :apply-classes hub.css/apply-classes
-                          :watch? true}}}}
+                          :watch? true}}
+  :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.211"}}
+            :exec-fn hf.depstar/uberjar
+            :exec-args {:aot true
+                        :verbose true
+                        :main-class hub.core
+                        :jar "target/app.jar"}}}}

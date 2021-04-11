@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Build
+./task build
+
+# Release
+dir="$HOME/releases/$(date "+%Y-%m-%d_%T")"
+mkdir -p $dir
+cp target/app.jar ~/config.env $dir
+cat > $dir/run.sh << EOD
+#!/usr/bin/env bash
+cd $dir
+set -o allexport
+source config.env
+set +o allexport
+java -jar app.jar
+EOD
+chmod +x run.sh
+ln -s $dir ~/releases/current
+
+# Run
+systemctl restart app

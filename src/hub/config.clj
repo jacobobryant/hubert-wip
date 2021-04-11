@@ -22,6 +22,5 @@
     {:flub.crux/topology :standalone
      :flub.jetty/quiet true
      :flub.web/port 8080
-     :mailgun/endpoint "https://api.mailgun.net/v3/mail.findka.com/messages"
-     :mailgun/from "Hubert <contact@mail.findka.com>"}
+     :hub.middleware/secure true}
     (flub/read-env env-keys)))

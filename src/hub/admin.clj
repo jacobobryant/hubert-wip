@@ -10,12 +10,16 @@
   (let [{:keys [flub.crux/node] :as sys} @flub/system]
     (assoc sys :flub.crux/db (delay (crux/db node)))))
 
+(defn generate-keys [_]
+  (doseq [[var-name length] [["COOKIE_KEY" 16]
+                             ["JWT_KEY" 32]]]
+    (println (str var-name "="
+               (flub/base64-encode (nonce/random-bytes length))))))
+
 (comment
-  (flub/base64-encode (nonce/random-bytes 16))
 
   (flub/pprint
-    (let [{:keys [flub.crux/db flub.reitit/router]} (sys)]
-    (r/routes router)
-    ;(flux/q-entity @db [[:user/email]])
-    ))
+    (let [{:keys [flub.crux/db ]} (sys)]
+      ; test stuff here
+      ))
   )

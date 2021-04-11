@@ -6,7 +6,6 @@
     [flub.crux :as flux]
     [flub.extra :as fe]
     [flub.views :as fv]
-    [hub.css :as css]
     [hub.schema :as s]
     [hub.templates :as templates]
     [hub.util :as hu]
@@ -89,6 +88,7 @@
 
 (def routes
   [["/" {:get #(home %)}]
-   ["/hub/api/authenticate" {:post #(authenticate %)
-                             :get #(verify-token %)}]
-   ["/hub/api/signout" {:get #(signout %)}]])
+   ["/hub/api" {}
+    ["/authenticate" {:post #(authenticate %)
+                      :get #(verify-token %)}]
+    ["/signout" {:get #(signout %)}]]])

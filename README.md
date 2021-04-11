@@ -1,18 +1,43 @@
 # Hubert
 
-## Deployment
+TODO add description
 
-### Dokku
+## Development
 
-Create a Dokku instance on DigitalOcean: https://marketplace.digitalocean.com/apps/dokku.
+Run `./task dev` and `./task css`.
 
-Hostname: findka.com
-[x] Use virtualhost naming for apps
+## Server setup
 
-ssh root@hub.findka.com
-dokku apps:create hubert
-dokku storage:mount hubert /var/lib/dokku/data/storage/hubert:/storage
+Copy `config-TEMPLATE` to `config`. Update vars in `config/prod.env` and
+`config/task.env`.
 
-git remote add dokku dokku@hub.findka.com:hubert
-git push dokku master
+Log in to DigitalOcean and create a droplet (Ubuntu 20.04 LTS). I usually do
+Regular Intel at $10/month. Add monitoring. Make sure your SSH key is selected.
+(If needed, go to Settings and add your SSH key, then start over). Set the
+hostname to something distinctive. After the droplet is created, go to
+Networking and point your domain to it (create an A record).
 
+Run the setup script on your new droplet, replacing `example.com` with your
+domain:
+
+```bash
+scp infra/setup.sh root@example.com:
+ssh root@example.com
+./setup.sh
+reboot
+```
+
+From your local machine, add your server as a remote:
+
+```bash
+git remote add prod ssh://app@example.com:repo.git
+```
+
+## Deploy
+
+Run `git push master prod`.
+
+## Monitoring
+
+Run `./task logs` to view the systemd logs. Run `./task prod-repl` to connect
+to the production nrepl server

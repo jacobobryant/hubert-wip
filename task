@@ -1,15 +1,51 @@
 #!/usr/bin/env bash
 # vim: ft=sh
+set -e
+set -o allexport
+source config/task.env
+set +o allexport
 
 dev () {
+  cd config
   set -o allexport
   source dev.env
   set +o allexport
-  clj "$@" -M -m hub.core
+  cd -
+  clj "$@" -A:girouette:test -M -m hub.core
 }
 
 css () {
   clj -X:girouette
+}
+
+generate-keys () {
+  clj -X hub.admin/generate-keys
+}
+
+tests () {
+  clojure -X:test
+}
+
+build () {
+  tests
+  clojure -X:girouette :watch? false
+  clojure -X:uberjar
+}
+
+logs () {
+  ssh root@$TASK_HOST journalctl -u app -u nginx -f -n 300
+}
+
+deploy () {
+  scp config/prod.env $TASK_USER@$TASK_HOST:config.env
+  git push master prod
+  echo Watching logs...
+  logs
+}
+
+prod-repl () {
+  echo Connect to nrepl port 7888
+  ssh -NL 7888:localhost:7888 root@$TASK_HOST
 }
 
 "$@"
