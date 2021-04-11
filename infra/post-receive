@@ -17,7 +17,7 @@ source config.env
 set +o allexport
 java -jar app.jar
 EOD
-chmod +x run.sh
+chmod +x $dir/run.sh
 ln -s $dir ~/releases/current
 
 # Run
