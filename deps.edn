@@ -1,12 +1,10 @@
 {:paths ["src" "resources" "target/resources"]
  :deps
- {flub/core           {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "core"}
-  flub/components     {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "components"}
-  flub/crux           {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "crux"}
-  flub/extra          {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "extra"}
-  flub/malli          {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "malli"}
-  flub/middleware     {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "middleware"}
-  flub/views          {:git/url "https://github.com/jacobobryant/flub" :sha "ba56f13389d5b3ca4c930871deddb9d97e6a33f0" :deps/root "views"}
+ {flub/components     {:git/url "https://github.com/jacobobryant/flub" :sha "2288f06486f105d1b258a511182bd6378adeb7e1" :deps/root "components"}
+  flub/crux           {:git/url "https://github.com/jacobobryant/flub" :sha "2288f06486f105d1b258a511182bd6378adeb7e1" :deps/root "crux"}
+  flub/extra          {:git/url "https://github.com/jacobobryant/flub" :sha "2288f06486f105d1b258a511182bd6378adeb7e1" :deps/root "extra"}
+  flub/middleware     {:git/url "https://github.com/jacobobryant/flub" :sha "2288f06486f105d1b258a511182bd6378adeb7e1" :deps/root "middleware"}
+  flub/views          {:git/url "https://github.com/jacobobryant/flub" :sha "2288f06486f105d1b258a511182bd6378adeb7e1" :deps/root "views"}
   org.clojure/clojure {:mvn/version "1.10.0"}
   org.slf4j/slf4j-nop {:mvn/version "1.7.25"}}
 

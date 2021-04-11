@@ -28,12 +28,8 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server;
     server_name _;
-    root /var/www/html;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
     location / {
-        try_files \$uri \$uri/ @proxy;
-    }
-    location @proxy {
         proxy_pass http://localhost:8080;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;

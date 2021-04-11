@@ -30,7 +30,7 @@
         bot (or (empty? email) (not-empty accept))
         email-sent (when-not bot
                      (or mock (fe/send-mailgun sys email-data)))]
-    (when email-sent
+    (when (and mock email-sent)
       (println (str "Click here to sign in as " email ": " url)))
     (fv/render v/authenticate
       {:email email

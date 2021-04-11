@@ -4,7 +4,7 @@
 
 (def env-keys
   ; env key | clj key | coerce fn
-  [["MAILGUN_KEY"       :mailgun/secret]
+  [["MAILGUN_KEY"       :mailgun/api-key]
    ["MAILGUN_ENDPOINT"  :mailgun/endpoint]
    ["MAILGUN_FROM"      :mailgun/from]
    ["MAILGUN_MOCK"      :mailgun/mock #(= "true" %)]

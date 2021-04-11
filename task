@@ -32,10 +32,11 @@ build () {
 }
 
 logs () {
-  ssh root@$TASK_HOST journalctl -u app -u nginx -f -n 300
+  ssh root@$TASK_HOST journalctl -u app -f -n 300
 }
 
 deploy () {
+  # todo hard code TASK_USER
   scp config/prod.env $TASK_USER@$TASK_HOST:config.env
   git push prod master
 }
