@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # vim: ft=sh
 set -e
-set -o allexport
-source config/task.env
-set +o allexport
+
+if [ -f config/task.env ]; then
+  set -o allexport
+  source config/task.env
+  set +o allexport
+fi
 
 dev () {
   cd config
