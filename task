@@ -38,7 +38,7 @@ logs () {
 deploy () {
   # todo hard code TASK_USER
   scp config/prod.env $TASK_USER@$TASK_HOST:config.env
-  git push prod master
+  time git push prod master
 }
 
 prod-repl () {
