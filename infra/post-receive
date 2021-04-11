@@ -21,4 +21,4 @@ chmod +x $dir/run.sh
 ln -s $dir ~/releases/current
 
 # Run
-systemctl restart app
+sudo systemctl restart app

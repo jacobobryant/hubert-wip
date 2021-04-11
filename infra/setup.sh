@@ -97,3 +97,5 @@ cat > /etc/systemd/journald.conf << EOD
 Storage=persistent
 EOD
 systemctl restart systemd-journald
+echo app ALL= NOPASSWD: /bin/systemctl restart app > /etc/sudoers.d/restart-app
+chmod 440 /etc/sudoers.d/restart-app
