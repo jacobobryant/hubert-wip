@@ -80,8 +80,17 @@
                                  :user-db db}))]
       (handler req))))
 
+(defn wrap-verbose [handler {:keys [verbose]}]
+  (if verbose
+    (fn [req]
+      (let [resp (handler req)]
+        (println (:status resp) (:request-method req) (:uri req))
+        resp))
+    handler))
+
 (defn wrap-middleware [{:keys [cookie/secret
                                hub.middleware/secure
+                               hub/verbose
                                flub.crux/node
                                flub.web/handler]
                         :as sys}]
@@ -93,9 +102,10 @@
         (fm/wrap-defaults {:session-store store
                            :secure secure
                            :env sys
-                           :on-error on-error})))))
+                           :on-error on-error})
+        (wrap-verbose {:verbose verbose})))))
 
-(defn ready [{:keys [flub.jetty/port]
+(defn ready [{:keys [flub.web/port]
               :or {port 8080}
               :as sys}]
   (println "Jetty running on" (str "http://localhost:" port))

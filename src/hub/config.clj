@@ -14,6 +14,7 @@
    ["MIDDLEWARE_SECURE" :hub.middleware/secure #(= "true" %)]
    ["CRUX_DIR"          :flub.crux/dir]
    ["USER_CRUX_DIR"     :hub/user-crux-dir]
+   ["VERBOSE"           :hub/verbose #(= "true" %)]
    ["PORT"              :flub.web/port #(Long/parseLong %)]])
 
 (defn merge-config [sys]
