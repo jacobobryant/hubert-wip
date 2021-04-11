@@ -3,16 +3,12 @@
 set -e
 
 if [ -f config/task.env ]; then
-  set -o allexport
   source config/task.env
-  set +o allexport
 fi
 
 dev () {
   cd config
-  set -o allexport
   source dev.env
-  set +o allexport
   cd -
   clj "$@" -A:girouette:test -M -m hub.core
 }
