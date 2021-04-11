@@ -30,12 +30,12 @@ reboot
 From your local machine, add your server as a remote:
 
 ```bash
-git remote add prod ssh://app@example.com:repo.git
+git remote add prod ssh://app@example.com/home/app/repo.git
 ```
 
 ## Deploy
 
-Run `git push master prod`.
+Commit your changes locally, then run `./task deploy`.
 
 ## Monitoring
 

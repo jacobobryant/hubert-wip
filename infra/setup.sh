@@ -55,11 +55,13 @@ ufw enable
 # Non-root user
 useradd -m app
 mkdir -m 700 -p /home/app/.ssh
-install -o app /root/.ssh/authorized_keys /home/app/.ssh
+cp /root/.ssh/authorized_keys /home/app/.ssh
+chown -R app:app /home/app/.ssh
 
 # Set up app with git
 set_up_app () {
   cd
+  mkdir code
   mkdir repo.git
   cd repo.git
   git init --bare

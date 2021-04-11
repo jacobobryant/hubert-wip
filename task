@@ -38,9 +38,7 @@ logs () {
 
 deploy () {
   scp config/prod.env $TASK_USER@$TASK_HOST:config.env
-  git push master prod
-  echo Watching logs...
-  logs
+  git push prod master
 }
 
 prod-repl () {
