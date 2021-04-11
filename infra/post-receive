@@ -16,6 +16,9 @@ source config.env
 java -jar app.jar
 EOD
 chmod +x $dir/run.sh
+if [ -f ~/releases/current ]; then
+  rm ~/releases/current
+fi
 ln -s $dir ~/releases/current
 
 # Run
