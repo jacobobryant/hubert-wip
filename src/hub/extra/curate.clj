@@ -1,8 +1,10 @@
 (ns hub.extra.curate
   (:require
+    [clojure.java.io :as io]
     [clojure.string :as str]
     [flub.core :as flub]
-    [flub.malli :as fm]
+    [flub.crux :as flux]
+    [flub.malli :as flubm]
     [flub.views :as fv]
     [hub.util :as hu]
     [hub.views :as hviews]
@@ -10,7 +12,7 @@
     [ring.middleware.anti-forgery :as anti-forgery]
     [rum.core :as rum :refer [defc]]))
 
-(def registry
+(def registry*
   {:item/uris         [:and [:vector :string] [:not empty?]]
    :item/rated-at     inst?
    :item/title        :string
@@ -26,7 +28,7 @@
    :item/content-url  :string
    :item/published-at inst?
    :item/flags        [:set :keyword] ; :subscribe :save-for-later :private
-   :item/formats      [:set :string]
+   :item/formats      [:set :keyword]
    :item/tags         [:set :string]
    :item/rating       [:and number? [:>= 1] [:<= 5]]
    :item/commentary   :string
@@ -48,6 +50,7 @@
           [:item/rating       {:optional true}]
           [:item/commentary   {:optional true}]]
    :event/item :item/id
+   :event/occurred-at inst?
    :event/type keyword?
    :event/id   :uuid
    :event      [:map
@@ -55,6 +58,8 @@
                 :event/occurred-at
                 :event/item
                 :event/type]})
+
+(def registry (flubm/registry registry*))
 
 (defn path-for [{:keys [flub.reitit/router]} route-name]
   (:path (r/match-by-name router route-name)))
@@ -108,25 +113,35 @@
          {:d
           "M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"}]]]]]))
 
-(defn rate-page [{:params/keys [url title description] :as req}]
+(defn history-page [req]
+  (hviews/plugin-base req
+    [:div "History page"]))
+
+(defn rate-page [{:params/keys [url
+                                title
+                                description
+                                visibility
+                                rating
+                                tags
+                                commentary]
+                  ::keys [rating-saved]
+                  :as req}]
+  ; todo prefill if doc exists
   (let [feed-url nil
+        bookmarklet (slurp (io/resource "hub/rate-item-bookmarklet.js"))
         notice (cond
-                 ; todo put actual message here
-                 feed-url ["hey"]
+                 rating-saved ["Your rating has been saved."]
                  (not url) ["Tip: drag "
-                            ; todo set href
-                            [:a.link {:href "#"} "this bookmarklet"]
+                            [:a.link {:href bookmarklet} "this bookmarklet"]
                             " to your bookmarks menu. Use it to rate the current page."]
                  :default nil)]
     (hviews/plugin-base req
       [:.max-w-prose
-       ; todo if feed-url is present, suggest subscribe page
        (form {:action (path-for req ::rate)}
-         [:div [:strong "Rate an article"]] ; todo change this to nav
-         [:.h-3]
+         ; todo add select box for content type (e.g. feed)
          (when notice
            (into [:.bg-gray-200.p-3.rounded.mb-3] notice))
-         ; todo update title, description after url change
+         ; todo update stuff after url change
          (text-field {:label "URL (required)"
                       :name "url"
                       :type "url"
@@ -146,10 +161,12 @@
          (select {:label "Visibility"
                   :options [["public" "Public"]
                             ["private" "Private"]]
-                  :default "public"
+                  :default (or visibility "public")
                   :name "visibility"})
          [:.h-3]
          (select {:label "Rating"
+                  :name "rating"
+                  :default (or rating "share")
                   :options [["share" "Share without rating"]
                             ["save" "Save for later"]
                             ["1" "★☆☆☆☆"]
@@ -164,17 +181,57 @@
          [:.h-3]
          (text-field {:label "Tags (space separated)"
                       :name "tags"
-                      :placeholder "philosophy cheese linux"})
+                      :placeholder "philosophy cheese linux"
+                      :value tags})
          [:.h-3]
          (text-field {:label "Commentary"
                       :name "commentary"
-                      :textarea true})
+                      :textarea true
+                      :value commentary})
          [:.h-5]
          [:div [:button.btn.w-full {:type "submit"} "Save"]])])))
 
-(defn submit-rating [req]
-  ; todo
-  nil)
+(defn normalize-tags [tags]
+  (-> (or tags "")
+    str/lower-case
+    (str/replace #"[^a-z\s]+" "-")
+    (str/split #"\s+")
+    set))
+
+(defn submit-rating [{:params/keys [url
+                                    title
+                                    description
+                                    visibility
+                                    rating
+                                    tags
+                                    commentary]
+                      :keys [hub/user-node hub/user-db]
+                      :as req}]
+  (let [tags (normalize-tags tags)
+        doc (merge
+              {:crux.db/id (java.util.UUID/randomUUID)
+               :item/rated-at (java.util.Date.)}
+              (select-keys
+                (flux/q-entity @user-db [[:item/uris url]])
+                [:crux.db/id :item/rated-at])
+              (hu/assoc-not-empty
+                {:item/uris [url]}
+                :item/title title
+                :item/description description
+                :item/flags (cond-> #{}
+                              (= visibility "private") (conj :private)
+                              (= rating "save") (conj :save-for-later))
+                :item/formats #{:article}
+                :item/tags tags
+                :item/rating (flub/catchall (Long/parseLong rating))
+                :item/commentary commentary))]
+    (flux/submit-tx
+      {:flub.crux/node @user-node
+       :flub.malli/registry registry}
+      {[:item (:crux.db/id doc)] doc})
+    (fv/render rate-page (assoc req
+                           ::rating-saved true
+                           :params/tags (str/join " " tags)))))
 
 (defn redirect [{::keys [route-name] :as req}]
   {:status 302
@@ -186,11 +243,16 @@
     ["/rate/" {:get #(fv/render rate-page %)
                :post #(submit-rating %)
                :name ::rate
-               :title "Rate"}]]])
+               :hub/title "Submit"
+               :hub/order 0}]
+    ["/history/" {:name ::history
+                  :get #(fv/render history-page %)
+                  :hub/title "History"
+                  :hub/order 1}]]])
 
 (def manifest
   {:title "Curate"
    :prefix "hub.curate"
    :routes routes
-   :registry registry
+   :registry registry*
    :refresh (fn [_] nil)})

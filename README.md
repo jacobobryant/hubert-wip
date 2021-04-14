@@ -2,6 +2,8 @@
 
 TODO add description
 
+In the mean time, see my recent posts on [Future of Discovery](https://news.findka.com/#archive).
+
 ## Development
 
 Run `./task dev` and `./task css`.

@@ -118,7 +118,29 @@
              :a.p-1.hover:underline)
            {:href path} title]))]]))
 
+(defc plugin-breadcrumbs [{:keys [hub/plugins
+                                  flub.reitit/router
+                                  uri]
+                           :as req}]
+  (let [prefix (second (str/split uri #"/"))
+        routes (->> (r/routes router)
+                 (map (fn [[path opts]]
+                        (assoc opts :path path)))
+                 (filter (fn [{:keys [path hub/title]}]
+                           (and
+                             title
+                             (str/starts-with? path (str "/" prefix "/")))))
+                 (sort-by (juxt #(:hub/order % 100) :path)))]
+    [:.mb-6
+     (flub/join " | "
+       (for [{:keys [path hub/title]} routes]
+         (if (= uri path)
+           [:strong title]
+           [:a.link {:href path} title])))]))
+
 (defc plugin-base [req & body]
   (base req
     (plugin-navbar req)
-    [:.p-3 body]))
+    [:.p-3
+     (plugin-breadcrumbs req)
+     body]))
