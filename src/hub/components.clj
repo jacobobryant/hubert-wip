@@ -5,7 +5,8 @@
     [flub.core :as flub]
     [flub.components :as c]
     [flub.crux :as flux]
-    [flub.middleware :as fm]
+    [flub.malli :as fmal]
+    [flub.middleware :as fmid]
     [flub.views :as fv]
     [hub.config :as config]
     [hub.plugins :as plugins]
@@ -29,9 +30,7 @@
   (merge sys
     {:flub.reitit/routes r/routes
      :flub.reitit/default-handlers default-handlers
-     :flub.malli/registry (mr/composite-registry
-                            m/default-registry
-                            schema/registry)}))
+     :flub.malli/registry (fmal/registry schema/registry)}))
 
 (defn wrap-plugins [sys]
   (let [plugins (map #(deref (requiring-resolve %)) plugins/plugins)
@@ -99,10 +98,10 @@
       (-> handler
         wrap-user-db
         (flux/wrap-db {:node node})
-        (fm/wrap-defaults {:session-store store
-                           :secure secure
-                           :env sys
-                           :on-error on-error})
+        (fmid/wrap-defaults {:session-store store
+                             :secure secure
+                             :env sys
+                             :on-error on-error})
         (wrap-verbose {:verbose verbose})))))
 
 (defn ready [{:keys [flub.web/port]
