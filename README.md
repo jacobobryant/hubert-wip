@@ -1,4 +1,4 @@
-# Hubert
+# Hubert (work in progress, not yet officially released)
 
 TODO add description
 
