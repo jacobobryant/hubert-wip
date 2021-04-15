@@ -6,7 +6,8 @@
   flub/malli          {;:git/url "https://github.com/jacobobryant/flub" :sha "2288f06486f105d1b258a511182bd6378adeb7e1" :deps/root "middleware"
                        :local/root "../flub/malli"
                        }
-  flub/middleware     {:git/url "https://github.com/jacobobryant/flub" :sha "2288f06486f105d1b258a511182bd6378adeb7e1" :deps/root "middleware"}
+  flub/middleware     {;:git/url "https://github.com/jacobobryant/flub" :sha "2288f06486f105d1b258a511182bd6378adeb7e1" :deps/root "middleware"
+                       :local/root "../flub/middleware"}
   flub/views          {:git/url "https://github.com/jacobobryant/flub" :sha "2288f06486f105d1b258a511182bd6378adeb7e1" :deps/root "views"}
   org.clojure/clojure {:mvn/version "1.10.0"}
   org.slf4j/slf4j-nop {:mvn/version "1.7.25"}}

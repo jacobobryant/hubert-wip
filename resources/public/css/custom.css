@@ -42,3 +42,7 @@ code {
 .input-text::-ms-input-placeholder {
   color: #6b7280;
 }
+
+hr {
+  border-top-width: 1px;
+}

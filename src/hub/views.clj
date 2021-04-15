@@ -131,7 +131,7 @@
                              title
                              (str/starts-with? path (str "/" prefix "/")))))
                  (sort-by (juxt #(:hub/order % 100) :path)))]
-    [:.mb-6
+    [:div
      (flub/join " | "
        (for [{:keys [path hub/title]} routes]
          (if (= uri path)
@@ -141,6 +141,7 @@
 (defc plugin-base [req & body]
   (base req
     (plugin-navbar req)
-    [:.p-3
-     (plugin-breadcrumbs req)
+    [:.p-3.bg-gray-200
+     (plugin-breadcrumbs req)]
+    [:.pb-3.sm:px-3.bg-gray-200.flex-grow
      body]))
