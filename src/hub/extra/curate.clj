@@ -9,6 +9,7 @@
     [flub.malli :as flubm]
     [flub.extra :as flex]
     [flub.views :as fv]
+    [hub.extra.curate.words :as words]
     [hub.util :as hu]
     [hub.views :as hviews]
     [lambdaisland.uri :as uri]
@@ -187,6 +188,23 @@
     [:.text-sm.text-gray-600 label]
     [:.mb-2 contents]))
 
+(defn profile-page [{:keys [path-params] :as req}]
+  (let [uid (:uid path-params)
+        gen (java.util.Random. (hash uid))
+        color (nth words/all-colors (.nextInt gen (count words/all-colors)))
+        adjective (nth words/adjectives (.nextInt gen (count words/adjectives)))
+        animal (nth words/animals (.nextInt gen (count words/animals)))]
+    (hviews/plugin-base req
+    [:.p-3.bg-white.w-full.max-w-prose
+     [:.flex.items-center
+      [:.rounded.flex-shrink-0.rounded-full.mr-3
+       {:class color
+        :style {:height "60px"
+                :width "60px"}}]
+      [:div
+       [:div (str/capitalize adjective) " " (str/capitalize animal)]
+       [:div.text-gray-600.text-sm (:uid path-params)]]]])))
+
 (defn history-page [{:keys [hub/user-db] :as req}]
   (let [offset 0
         results (crux/q @user-db
@@ -208,26 +226,28 @@
                              tags
                              commentary
                              rated-at]} (doc->form item)]]
-           [:.p-3.bg-white.max-w-84.mb-3.flex-1
+           [:.p-3.bg-white.max-w-84.mb-3.flex-1.flex.flex-col
             (card-row "Link"
-              (list [:a.link.break-all {:href url :target "_blank"} (or title url)]
-                (when title
-                  [:span.text-gray-600.break-all
-                   (str " (" (:host (uri/uri url)) ")")])))
+              [:.line-clamp-2
+               [:a.link.break-all {:href url :target "_blank"} (or title url)]
+               (when title
+                 [:span.text-gray-600.break-all
+                  (str " (" (:host (uri/uri url)) ")")])])
             (when description
-              (card-row "Description" description))
+              (card-row "Description" [:.line-clamp-3 description]))
             (card-row "Visibility" (str/capitalize visibility))
-            (card-row "Rating"
-              (case rating
-                "save" "Saved for later"
-                "share" "Shared without rating"
-                (repeat (Long/parseLong rating) "★")))
+            (when (not= rating "share")
+              (card-row "Rating"
+                (if (= rating "save")
+                  "Saved for later"
+                  (repeat (Long/parseLong rating) "★"))))
             (when (not-empty tags)
               (card-row "Tags" tags))
             (when commentary
-              (card-row "Commentary" commentary))
+              (card-row "Commentary" [:.line-clamp-3 commentary]))
             (card-row "Date added"
               (flub/format-date rated-at "dd MMM YYYY"))
+            [:.flex-grow]
             [:hr.my-3]
             [:.flex.justify-end
              (form {:action (path-for req ::tx)
@@ -254,9 +274,9 @@
         bookmarklet (slurp (io/resource "hub/rate-item-bookmarklet.js"))
         notice (cond
                  rating-saved ["Your rating has been saved."]
-                 (not url) ["Tip: drag "
-                            [:a.link {:href bookmarklet} "this bookmarklet"]
-                            " to your bookmarks menu. Use it to rate the current page."]
+                 (not url) ["Tip: drag this bookmarklet ("
+                            [:a.link {:href bookmarklet} "Add to Findka Hub"]
+                            ") to your bookmarks menu. Use it to rate the current page."]
                  :default nil)]
     (hviews/plugin-base req
       [:.max-w-prose.bg-white.p-3
@@ -355,7 +375,14 @@
                   :hub/title "History"
                   :hub/order 1}]
     ["/api/tx" {:name ::tx
-                :post #(tx %)}]]])
+                :post #(tx %)}]]
+   ["" {:middleware [anti-forgery/wrap-anti-forgery]}
+    ["/profile/:uid" {:name ::profile
+                      :get #(fv/render profile-page %)
+                      :hub/default-path-params (fn [{:keys [session/uid]}]
+                                                 {:uid uid})
+                      :hub/title "Profile"
+                      :hub/order 2}]]])
 
 (def manifest
   {:title "Curate"

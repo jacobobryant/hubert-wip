@@ -133,7 +133,11 @@
                  (sort-by (juxt #(:hub/order % 100) :path)))]
     [:div
      (flub/join " | "
-       (for [{:keys [path hub/title]} routes]
+       (for [{:keys [path name hub/title hub/default-path-params]} routes
+             :let [path (if default-path-params
+                          (:path (r/match-by-name router name
+                                   (default-path-params req)))
+                          path)]]
          (if (= uri path)
            [:strong title]
            [:a.link {:href path} title])))]))

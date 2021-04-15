@@ -46,3 +46,24 @@ code {
 hr {
   border-top-width: 1px;
 }
+
+.line-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 3;
+}
