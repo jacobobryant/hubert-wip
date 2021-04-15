@@ -18,7 +18,7 @@ javascript:(function () {
       "";
   feed = (new URL(feed, document.location)).href;
 
-  window.location = airtable_form_url +
+  window.location = form_url +
       "?url=" + encodeURIComponent(document.location) +
       "&title=" + encodeURIComponent(title) +
       "&description=" + encodeURIComponent(description) +

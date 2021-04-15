@@ -209,10 +209,11 @@
                              commentary
                              rated-at]} (doc->form item)]]
            [:.p-3.bg-white.max-w-84.mb-3
-            [:.mb-1 [:a.link {:href url :target "_blank"} (or title url)]
-             (when-not title
-               [:span.bg-gray-600
-                (str " (" (:host (uri/uri url)) ")")])]
+            (card-row "Link"
+              (list [:a.link.break-all {:href url :target "_blank"} (or title url)]
+                (when-not title
+                  [:span.text-gray-600.break-all
+                   (str " (" (:host (uri/uri url)) ")")])))
             (when description
               (card-row "Description" description))
             (card-row "Visibility" (str/capitalize visibility))
@@ -221,11 +222,12 @@
                 "save" "Saved for later"
                 "share" "Shared without rating"
                 (repeat (Long/parseLong rating) "★")))
-            (when tags
+            (when (not-empty tags)
               (card-row "Tags" tags))
             (when commentary
               (card-row "Commentary" commentary))
-            [:.text-sm (flub/format-date rated-at "dd MMM YYYY")]
+            (card-row "Date added"
+              (flub/format-date rated-at "dd MMM YYYY"))
             [:hr.my-3]
             [:.flex.justify-end
              (form {:action (path-for req ::tx)
