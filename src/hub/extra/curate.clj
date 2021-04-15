@@ -208,10 +208,10 @@
                              tags
                              commentary
                              rated-at]} (doc->form item)]]
-           [:.p-3.bg-white.max-w-84.mb-3
+           [:.p-3.bg-white.max-w-84.mb-3.flex-1
             (card-row "Link"
               (list [:a.link.break-all {:href url :target "_blank"} (or title url)]
-                (when-not title
+                (when title
                   [:span.text-gray-600.break-all
                    (str " (" (:host (uri/uri url)) ")")])))
             (when description
